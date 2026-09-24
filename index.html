@@ -242,7 +242,10 @@
   input,textarea,select{width:100%;font:inherit;font-size:1rem;padding:13px 14px;border:1.5px solid var(--line);border-radius:10px;background:#FCFBF8;color:var(--ink);min-height:48px;transition:border .2s,box-shadow .2s}
   input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(242,183,43,.2)}
   textarea{min-height:120px;resize:vertical}
-  .form-note{font-size:.85rem;color:var(--muted);margin-top:12px}
+  .form-note{font-size:.85rem;color:var(--muted);margin-top:12px;transition:background .2s,color .2s}
+  .form-note.success{display:flex;align-items:center;gap:8px;color:#146C43;background:#E9F7EF;border:1px solid #BFE6CC;border-radius:10px;padding:12px 14px;font-weight:600;font-size:.92rem}
+  .form-note.success svg{flex:none;width:18px;height:18px;stroke:#146C43}
+  .form-note.error{color:#B42318;background:#FDECEC;border:1px solid #F3B4B0;border-radius:10px;padding:12px 14px;font-weight:600;font-size:.92rem}
 
   /* footer */
   footer{background:var(--ink);color:#B5B1A8;padding:56px 0 28px}
@@ -796,6 +799,7 @@
     const btn=form.querySelector('button[type="submit"]');
     const originalBtnText=btn.textContent;
     btn.disabled=true;
+    note.classList.remove('success','error');
     const body=new URLSearchParams(new FormData(form)).toString();
     fetch('/', {
       method:'POST',
@@ -804,12 +808,15 @@
     }).then(res=>{
       if(!res.ok) throw new Error('Submit failed');
       form.reset();
-      note.textContent=dict['form.success']||T.nl['form.success'];
+      const successText=dict['form.success']||T.nl['form.success']||'Bedankt! Je aanvraag is verzonden — Jasna neemt binnenkort contact met je op.';
+      note.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>'+successText+'</span>';
+      note.classList.add('success');
       btn.textContent=originalBtnText;
     }).catch(()=>{
       btn.disabled=false;
       btn.textContent=originalBtnText;
       note.textContent=dict['form.error']||T.nl['form.error']||'Er ging iets mis. Mail ons gerust rechtstreeks.';
+      note.classList.add('error');
     });
   });
 </script>
