@@ -535,7 +535,9 @@
           </div>
         </div>
       </div>
-      <form class="reveal" id="contactForm">
+      <form class="reveal" id="contactForm" name="contact" method="POST" data-netlify="true" data-netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="contact">
+        <p style="position:absolute;left:-9999px" aria-hidden="true"><label>Laat dit veld leeg: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
         <h3 data-i18n="form.h3">Plan een kennismaking</h3>
         <p data-i18n="form.p">Vertel kort wat er op je bord ligt. Jasna neemt contact op voor een vrijblijvend gesprek.</p>
         <div class="row">
@@ -696,6 +698,7 @@
     "form.opt4":"Inbox &amp; calendar management","form.opt5":"Clearing a backlog","form.opt6":"Not sure yet — let's talk",
     "form.submit":"Send request","form.note":"Your details are only used to respond to your request.",
     "form.success":"Thank you! Your request has been sent — Jasna will contact you soon.",
+    "form.error":"Something went wrong. Feel free to email us directly.",
     "footer.tagline":"Administrative support for entrepreneurs in the Antwerp area. Let go, take hold, trust it.",
     "footer.navTitle":"Navigation","footer.location":"Schoten, Belgium","footer.privacy":"Privacy policy","footer.cookies":"Cookie policy",
     "footer.copy":"© 2026 Jasna@Work — Jasna Hellemans. All rights reserved.","footer.by":"Website by",
@@ -764,6 +767,7 @@
     "form.opt4":"Gestion de boîte mail et d'agenda","form.opt5":"Rattraper un retard","form.opt6":"Pas encore sûr(e) — parlons-en",
     "form.submit":"Envoyer la demande","form.note":"Vos données ne sont utilisées que pour répondre à votre demande.",
     "form.success":"Merci ! Votre demande a été envoyée — Jasna vous recontactera rapidement.",
+    "form.error":"Une erreur s'est produite. N'hésitez pas à nous écrire directement.",
     "footer.tagline":"Soutien administratif pour les entrepreneurs de la région d'Anvers. Lâchez prise, reprenez le contrôle, faites confiance.",
     "footer.navTitle":"Navigation","footer.location":"Schoten, Belgique","footer.privacy":"Politique de confidentialité","footer.cookies":"Politique de cookies",
     "footer.copy":"© 2026 Jasna@Work — Jasna Hellemans. Tous droits réservés.","footer.by":"Site web par",
@@ -788,7 +792,25 @@
   form.addEventListener('submit',e=>{
     e.preventDefault();
     const dict=T[currentLang]||T.nl;
-    form.querySelector('.form-note').textContent=dict['form.success']||T.nl['form.success'];
+    const note=form.querySelector('.form-note');
+    const btn=form.querySelector('button[type="submit"]');
+    const originalBtnText=btn.textContent;
+    btn.disabled=true;
+    const body=new URLSearchParams(new FormData(form)).toString();
+    fetch('/', {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body,
+    }).then(res=>{
+      if(!res.ok) throw new Error('Submit failed');
+      form.reset();
+      note.textContent=dict['form.success']||T.nl['form.success'];
+      btn.textContent=originalBtnText;
+    }).catch(()=>{
+      btn.disabled=false;
+      btn.textContent=originalBtnText;
+      note.textContent=dict['form.error']||T.nl['form.error']||'Er ging iets mis. Mail ons gerust rechtstreeks.';
+    });
   });
 </script>
 </body>
